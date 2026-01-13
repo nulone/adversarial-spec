@@ -423,9 +423,7 @@ class TestCmdSetup:
         import pytest
         from telegram_bot import cmd_setup
 
-        with patch.dict(
-            "os.environ", {"TELEGRAM_BOT_TOKEN": "test-token"}, clear=True
-        ):
+        with patch.dict("os.environ", {"TELEGRAM_BOT_TOKEN": "test-token"}, clear=True):
             with patch("sys.stdout", new_callable=StringIO):
                 args = MagicMock()
                 with pytest.raises(SystemExit) as exc_info:

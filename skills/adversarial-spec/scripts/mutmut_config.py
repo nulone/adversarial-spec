@@ -52,7 +52,7 @@ def pre_mutation(context):
         return
 
     # Skip environment variable settings
-    if 'os.environ[' in line:
+    if "os.environ[" in line:
         context.skip = True
         return
 

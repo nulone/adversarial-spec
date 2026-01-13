@@ -531,7 +531,13 @@ class TestHandleUtilityCommandEdgeCases:
 
         parser = debate.create_parser()
         args = parser.parse_args(
-            ["diff", "--previous", "/nonexistent/prev.md", "--current", "/nonexistent/curr.md"]
+            [
+                "diff",
+                "--previous",
+                "/nonexistent/prev.md",
+                "--current",
+                "/nonexistent/curr.md",
+            ]
         )
 
         with pytest.raises(SystemExit) as exc_info:
@@ -692,9 +698,7 @@ class TestSendTelegramNotification:
     @patch("telegram_bot.send_long_message")
     @patch("telegram_bot.get_last_update_id")
     @patch("telegram_bot.get_config")
-    def test_handles_all_agree(
-        self, mock_config, mock_last_id, mock_send, mock_poll
-    ):
+    def test_handles_all_agree(self, mock_config, mock_last_id, mock_send, mock_poll):
         import debate
         from models import ModelResponse
 
@@ -708,7 +712,9 @@ class TestSendTelegramNotification:
             ModelResponse(model="gemini", response="[AGREE]", agreed=True, spec="spec"),
         ]
 
-        feedback = debate.send_telegram_notification(["gpt-4o", "gemini"], 1, results, 60)
+        feedback = debate.send_telegram_notification(
+            ["gpt-4o", "gemini"], 1, results, 60
+        )
         assert feedback is None
         # Check message was sent with ALL AGREE status
         call_args = mock_send.call_args

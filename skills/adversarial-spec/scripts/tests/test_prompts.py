@@ -199,7 +199,11 @@ class TestPersonas:
         # Mutation: XX prefix/suffix would fail keyword checks
         content = PERSONAS["legal-compliance"]
         assert "legal" in content.lower() or "compliance" in content.lower()
-        assert "gdpr" in content.lower() or "regulation" in content.lower() or "privacy" in content.lower()
+        assert (
+            "gdpr" in content.lower()
+            or "regulation" in content.lower()
+            or "privacy" in content.lower()
+        )
 
 
 class TestPreserveIntentPrompt:
@@ -248,7 +252,9 @@ class TestPersonaStringIntegrity:
     def test_all_personas_start_with_you_are(self):
         # Mutation: XX prefix would fail this check
         for name, content in PERSONAS.items():
-            assert content.startswith("You are"), f"Persona {name} should start with 'You are'"
+            assert content.startswith("You are"), (
+                f"Persona {name} should start with 'You are'"
+            )
 
     def test_custom_persona_fallback_starts_correctly(self):
         # Mutation: XX prefix on fallback would fail
@@ -274,4 +280,6 @@ class TestFocusAreaStringIntegrity:
     def test_all_focus_areas_start_with_critical(self):
         # Mutation: XX prefix would fail this check
         for name, content in FOCUS_AREAS.items():
-            assert content.strip().startswith("**CRITICAL FOCUS"), f"Focus area {name} should start with CRITICAL FOCUS"
+            assert content.strip().startswith("**CRITICAL FOCUS"), (
+                f"Focus area {name} should start with CRITICAL FOCUS"
+            )

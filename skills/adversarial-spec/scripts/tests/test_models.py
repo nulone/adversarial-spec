@@ -519,6 +519,7 @@ class TestCallCodexModel:
     @patch("models.CODEX_AVAILABLE", False)
     def test_raises_when_codex_unavailable(self):
         import pytest
+
         with pytest.raises(RuntimeError, match="Codex CLI not found"):
             call_codex_model("system", "user", "codex/gpt-5")
 
@@ -529,7 +530,7 @@ class TestCallCodexModel:
         mock_run.return_value = Mock(
             returncode=0,
             stdout='{"type":"item.completed","item":{"type":"agent_message","text":"Response"}}\n{"type":"turn.completed","usage":{"input_tokens":100,"output_tokens":50}}',
-            stderr=""
+            stderr="",
         )
         response, inp, out = call_codex_model("sys", "user", "codex/gpt-5.2-codex")
         # Verify model name was extracted and passed to command
@@ -543,7 +544,7 @@ class TestCallCodexModel:
         mock_run.return_value = Mock(
             returncode=0,
             stdout='{"type":"item.completed","item":{"type":"agent_message","text":"Test response"}}\n{"type":"turn.completed","usage":{"input_tokens":150,"output_tokens":75}}',
-            stderr=""
+            stderr="",
         )
         response, inp, out = call_codex_model("sys", "user", "codex/model")
         assert response == "Test response"
@@ -554,11 +555,8 @@ class TestCallCodexModel:
     @patch("models.subprocess.run")
     def test_handles_nonzero_exit_code(self, mock_run):
         import pytest
-        mock_run.return_value = Mock(
-            returncode=1,
-            stdout="",
-            stderr="Some error"
-        )
+
+        mock_run.return_value = Mock(returncode=1, stdout="", stderr="Some error")
         with pytest.raises(RuntimeError, match="Codex CLI failed"):
             call_codex_model("sys", "user", "codex/model")
 
@@ -566,10 +564,11 @@ class TestCallCodexModel:
     @patch("models.subprocess.run")
     def test_handles_no_agent_message(self, mock_run):
         import pytest
+
         mock_run.return_value = Mock(
             returncode=0,
             stdout='{"type":"turn.completed","usage":{"input_tokens":100,"output_tokens":50}}',
-            stderr=""
+            stderr="",
         )
         with pytest.raises(RuntimeError, match="No agent message found"):
             call_codex_model("sys", "user", "codex/model")
@@ -580,7 +579,7 @@ class TestCallCodexModel:
         mock_run.return_value = Mock(
             returncode=0,
             stdout='{"type":"item.completed","item":{"type":"agent_message","text":"Response"}}\n{"type":"turn.completed","usage":{"input_tokens":100,"output_tokens":50}}',
-            stderr=""
+            stderr="",
         )
         call_codex_model("sys", "user", "codex/model", search=True)
         cmd = mock_run.call_args[0][0]
@@ -591,6 +590,7 @@ class TestCallCodexModel:
     def test_timeout_raises_runtime_error(self, mock_run):
         import pytest
         import subprocess
+
         mock_run.side_effect = subprocess.TimeoutExpired("codex", 600)
         with pytest.raises(RuntimeError, match="timed out"):
             call_codex_model("sys", "user", "codex/model")
@@ -599,6 +599,7 @@ class TestCallCodexModel:
     @patch("models.subprocess.run")
     def test_file_not_found_raises_runtime_error(self, mock_run):
         import pytest
+
         mock_run.side_effect = FileNotFoundError()
         with pytest.raises(RuntimeError, match="not found in PATH"):
             call_codex_model("sys", "user", "codex/model")
@@ -609,7 +610,7 @@ class TestCallCodexModel:
         mock_run.return_value = Mock(
             returncode=0,
             stdout='{"type":"item.completed","item":{"type":"agent_message","text":"R"}}\n{"type":"turn.completed","usage":{"input_tokens":1,"output_tokens":1}}',
-            stderr=""
+            stderr="",
         )
         call_codex_model("sys", "user", "codex/model", reasoning_effort="high")
         cmd = mock_run.call_args[0][0]
@@ -622,7 +623,7 @@ class TestCallCodexModel:
         mock_run.return_value = Mock(
             returncode=0,
             stdout='\n\n{"type":"item.completed","item":{"type":"agent_message","text":"Response"}}\n\n{"type":"turn.completed","usage":{"input_tokens":100,"output_tokens":50}}\n',
-            stderr=""
+            stderr="",
         )
         response, inp, out = call_codex_model("sys", "user", "codex/model")
         assert response == "Response"
@@ -634,7 +635,7 @@ class TestCallCodexModel:
         mock_run.return_value = Mock(
             returncode=0,
             stdout='{"type":"item.completed","item":{"type":"agent_message","text":"Response"}}',
-            stderr=""
+            stderr="",
         )
         response, inp, out = call_codex_model("sys", "user", "codex/model")
         # Without turn.completed event, should default to 0
@@ -647,7 +648,7 @@ class TestCallCodexModel:
         mock_run.return_value = Mock(
             returncode=0,
             stdout='not json\n{"type":"item.completed","item":{"type":"agent_message","text":"Response"}}\n{"type":"turn.completed","usage":{"input_tokens":100,"output_tokens":50}}',
-            stderr=""
+            stderr="",
         )
         response, inp, out = call_codex_model("sys", "user", "codex/model")
         assert response == "Response"
@@ -659,7 +660,7 @@ class TestCallCodexModel:
         mock_run.return_value = Mock(
             returncode=0,
             stdout='{"type":"item.completed","item":{"type":"agent_message","text":"R"}}\n{"type":"turn.completed","usage":{"input_tokens":0,"output_tokens":0}}',
-            stderr=""
+            stderr="",
         )
         response, inp, out = call_codex_model("sys", "user", "codex/model")
         # Verify we get exact values from usage, not defaults
@@ -671,15 +672,14 @@ class TestCallSingleModel:
     @patch("models.completion")
     def test_returns_model_response_on_success(self, mock_completion):
         mock_response = Mock()
-        mock_response.choices = [Mock(message=Mock(content="[AGREE]\n[SPEC]Final spec[/SPEC]"))]
+        mock_response.choices = [
+            Mock(message=Mock(content="[AGREE]\n[SPEC]Final spec[/SPEC]"))
+        ]
         mock_response.usage = Mock(prompt_tokens=100, completion_tokens=50)
         mock_completion.return_value = mock_response
 
         result = call_single_model(
-            model="gpt-4o",
-            spec="# Test Spec",
-            round_num=1,
-            doc_type="prd"
+            model="gpt-4o", spec="# Test Spec", round_num=1, doc_type="prd"
         )
 
         assert result.model == "gpt-4o"
@@ -691,7 +691,9 @@ class TestCallSingleModel:
     @patch("models.completion")
     def test_extracts_spec_from_response(self, mock_completion):
         mock_response = Mock()
-        mock_response.choices = [Mock(message=Mock(content="Critique here\n[SPEC]\n# New Spec\n[/SPEC]"))]
+        mock_response.choices = [
+            Mock(message=Mock(content="Critique here\n[SPEC]\n# New Spec\n[/SPEC]"))
+        ]
         mock_response.usage = Mock(prompt_tokens=100, completion_tokens=50)
         mock_completion.return_value = mock_response
 
@@ -718,8 +720,8 @@ class TestCallSingleModel:
             Exception("Second failure"),
             Mock(
                 choices=[Mock(message=Mock(content="[AGREE]"))],
-                usage=Mock(prompt_tokens=10, completion_tokens=5)
-            )
+                usage=Mock(prompt_tokens=10, completion_tokens=5),
+            ),
         ]
 
         result = call_single_model("gpt-4o", "spec", 1, "prd")
@@ -737,8 +739,8 @@ class TestCallSingleModel:
             Exception("Second failure"),
             Mock(
                 choices=[Mock(message=Mock(content="[AGREE]"))],
-                usage=Mock(prompt_tokens=10, completion_tokens=5)
-            )
+                usage=Mock(prompt_tokens=10, completion_tokens=5),
+            ),
         ]
 
         call_single_model("gpt-4o", "spec", 1, "prd")
@@ -861,10 +863,7 @@ class TestCallSingleModel:
     @patch("models.CODEX_AVAILABLE", True)
     @patch("models.time.sleep")
     def test_codex_retries_on_failure(self, mock_sleep, mock_codex):
-        mock_codex.side_effect = [
-            Exception("First fail"),
-            ("[AGREE]", 10, 5)
-        ]
+        mock_codex.side_effect = [Exception("First fail"), ("[AGREE]", 10, 5)]
 
         result = call_single_model("codex/gpt-5", "spec", 1, "prd")
         assert mock_codex.call_count == 2
@@ -887,7 +886,7 @@ class TestCallSingleModel:
         mock_codex.side_effect = [
             Exception("First fail"),
             Exception("Second fail"),
-            ("[AGREE]", 10, 5)
+            ("[AGREE]", 10, 5),
         ]
 
         call_single_model("codex/gpt-5", "spec", 1, "prd")
@@ -900,17 +899,14 @@ class TestCallModelsParallel:
     @patch("models.call_single_model")
     def test_calls_all_models(self, mock_single):
         mock_single.return_value = ModelResponse(
-            model="test",
-            response="[AGREE]",
-            agreed=True,
-            spec="spec"
+            model="test", response="[AGREE]", agreed=True, spec="spec"
         )
 
         results = call_models_parallel(
             models=["gpt-4o", "gemini-pro", "claude-3"],
             spec="test spec",
             round_num=1,
-            doc_type="prd"
+            doc_type="prd",
         )
 
         assert len(results) == 3
@@ -923,15 +919,16 @@ class TestCallModelsParallel:
                 model=model,
                 response=f"Response from {model}",
                 agreed=model == "gpt-4o",
-                spec="spec"
+                spec="spec",
             )
+
         mock_single.side_effect = make_response
 
         results = call_models_parallel(
             models=["gpt-4o", "gemini-pro"],
             spec="test spec",
             round_num=1,
-            doc_type="prd"
+            doc_type="prd",
         )
 
         models = [r.model for r in results]
@@ -958,7 +955,7 @@ class TestCallModelsParallel:
             codex_search=True,
             timeout=300,
             bedrock_mode=True,
-            bedrock_region="us-west-2"
+            bedrock_region="us-west-2",
         )
 
         call_args = mock_single.call_args
