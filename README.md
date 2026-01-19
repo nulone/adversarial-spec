@@ -1,5 +1,9 @@
 # adversarial-spec
 
+[![CI](https://github.com/nulone/adversarial-spec/actions/workflows/ci.yml/badge.svg)](https://github.com/nulone/adversarial-spec/actions)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 A Claude Code plugin that iteratively refines product specifications through multi-model debate until consensus is reached.
 
 **Key insight:** A single LLM reviewing a spec will miss things. Multiple LLMs debating a spec will catch gaps, challenge assumptions, and surface edge cases that any one model would overlook. The result is a document that has survived rigorous adversarial review.
